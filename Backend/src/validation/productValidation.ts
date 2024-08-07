@@ -1,9 +1,17 @@
-import joi from 'joi';
+import Joi from 'joi';
+import mongoose from 'mongoose';
 
-export const ProductValidationSchema = joi.object({
-    name: joi.string().min(3).max(50).required(),
-    description: joi.string().max(500).required(),
-    price: joi.number().positive().required(),
-    imageURL: joi.string().uri().required(),
-    createdBy: joi.string().required()
+export const ProductValidationSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().required(),
+    price: Joi.number().required(),
+    imageURL: Joi.string().uri().required(),
+    createdBy: Joi.string().custom((value, helpers) => {
+        if (!mongoose.Types.ObjectId.isValid(value)) {
+            return helpers.error('any.invalid'); 
+        }
+        return value;
+    }).required()
+}).messages({
+    'any.invalid': 'Invalid ObjectId' 
 });

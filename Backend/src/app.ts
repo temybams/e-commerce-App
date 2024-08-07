@@ -10,7 +10,8 @@ import connectDB from './config/dbConfig';
 
 
 import indexRouter from './routes/index';
-import usersRouter from './routes/users';
+import usersRouter from './routes/usersRoutes';
+import productRouter from './routes/productRoutes'
 
 
 dotenv.config();
@@ -27,8 +28,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/products', productRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

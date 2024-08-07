@@ -10,7 +10,7 @@ interface IUser extends Document {
 }
 
 
-const UserValidationSchema = joi.object({
+export const UserValidationSchema = joi.object({
     username: joi.string().min(3).max(30).required(),
     email: joi.string().email().required(),
     password: joi.string().min(6).required()
@@ -21,6 +21,7 @@ const UserSchema = new Schema<IUser>({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true }
 });
+
 
 UserSchema.methods.matchPassword = async function (enteredPassword: string): Promise<boolean> {
     return bcrypt.compare(enteredPassword, this.password);
@@ -35,32 +36,11 @@ UserSchema.pre<IUser>('save', async function (next) {
         const saltRounds = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10;
         this.password = await bcrypt.hash(this.password, saltRounds);
         next();
-    } catch (error: any) {
+    } catch (error:any) {
         next(error);
     }
 });
 
-
 const User = mongoose.model<IUser>('User', UserSchema);
 
 export default User;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

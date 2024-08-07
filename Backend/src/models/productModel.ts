@@ -1,8 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
-import { ProductValidationSchema } from '../validation/productValidation'
+import mongoose, { Schema, Document } from 'mongoose';
+import { ProductValidationSchema } from '../validation/productValidation';
 
 
-interface IProduct extends mongoose.Document {
+interface IProduct extends Document {
     name: string;
     description: string;
     price: number;
@@ -20,11 +20,18 @@ const ProductSchema = new Schema<IProduct>({
 
 
 ProductSchema.pre<IProduct>('validate', async function (next) {
+    console.log('Pre-validation Middleware: Product details:', this);
+
     try {
         const { name, description, price, imageURL, createdBy } = this;
-        await ProductValidationSchema.validateAsync({ name, description, price, imageURL, createdBy }, { abortEarly: false });
+        
+        await ProductValidationSchema.validateAsync(
+            { name, description, price, imageURL, createdBy: createdBy.toString() },
+            { abortEarly: false }
+        );
         next();
     } catch (error: any) {
+        console.error('Validation Error:', error);
         next(error);
     }
 });
