@@ -19,44 +19,95 @@
         <label for="imageURL">Image URL:</label>
         <input type="text" v-model="imageURL" required />
       </div>
-      <button type="submit">Add Product</button>
+      <button type="submit" :disabled="isSubmitting">Add Product</button>
     </form>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { mapActions } from 'vuex';
+import { defineComponent, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   name: 'AddProduct',
-  data() {
-    return {
-      name: '',
-      description: '',
-      price: 0,
-      imageURL: '',
-    };
-  },
-  methods: {
-    ...mapActions(['addProduct']),
-    async addProductHandler() {
+  setup() {
+    const toast = useToast();
+    const router = useRouter();
+    const store = useStore();
+
+    const name = ref('');
+    const description = ref('');
+    const price = ref(0);
+    const imageURL = ref('');
+
+    const addProductHandler = async () => {
       try {
-        await this.addProduct({
-          name: this.name,
-          description: this.description,
-          price: this.price,
-          imageURL: this.imageURL,
+        await store.dispatch('addProduct', {
+          name: name.value,
+          description: description.value,
+          price: price.value,
+          imageURL: imageURL.value,
         });
-        this.$router.push('/products');
+        toast.success('Product added successfully!');
+        router.push('/products');
       } catch (error) {
-        console.error('Add product failed:', error);
+        toast.error('Failed to add product.');
       }
-    },
-  },
+    };
+
+    return {
+      name,
+      description,
+      price,
+      imageURL,
+      addProductHandler,
+      isSubmitting: computed(() => store.getters.isSubmitting),
+    };
+  }
 });
 </script>
 
 <style scoped>
-/* Add your styles here */
+.add-product {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+form {
+  display: grid;
+  gap: 1rem;
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+input, textarea {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
 </style>
